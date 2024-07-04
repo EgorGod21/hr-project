@@ -13,10 +13,10 @@ dag = DAG(
     catchup=False
 )
 
-# Задача DummyOperator, которая служит начальной точкой
+# Задача EmptyOperator, которая служит начальной точкой
 start_step = EmptyOperator(task_id="start_step", dag=dag)
 
-# Задача PostgresOperator для выполнения SQL-запроса
+# Задача SQLExecuteQueryOperator для выполнения SQL-запроса
 sql_select_step = SQLExecuteQueryOperator(
     task_id="sql_select_step",
     sql='''SELECT * FROM source_data.отрасли''',
@@ -24,8 +24,9 @@ sql_select_step = SQLExecuteQueryOperator(
     dag=dag
 )
 
-# Задача DummyOperator, которая служит конечной точкой
+# Задача EmptyOperator, которая служит конечной точкой
 end_step = EmptyOperator(task_id="end_step", dag=dag)
 
 # Определение порядка выполнения задач
 start_step >> sql_select_step >> end_step
+

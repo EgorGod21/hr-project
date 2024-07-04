@@ -35,6 +35,3 @@ docker compose up
 
 Создайте [поключение](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html) к базе данных.
 
-## Запуск тестового DAG
-
-Перейдите в веб-интерфейс Airflow, доступный по адресу http://localhost:8080,  запустите DAG с названием "test_dag" для выполнения задач.

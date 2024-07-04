@@ -10,7 +10,7 @@ dag = DAG('test_connection', description='postgres',
 start_step = EmptyOperator(task_id="start_step", dag=dag)
 hello_step = SQLExecuteQueryOperator(task_id="insert_step",
                             sql='''SELECT * FROM source_data."инструменты" LIMIT 5''',
-                            conn_id='source',
+                            conn_id='db_source_postgres',
                             dag=dag)
 end_step = EmptyOperator(task_id="end_step", dag=dag)
 

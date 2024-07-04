@@ -6,11 +6,11 @@
 ```
 cd docker
 ```
-Помимо `dags` создайте директории `logs`, `plugins`, `config`.
-Создайте файл `.env` с содержимым `AIRFLOW_UID=50000`
+Помимо `dags` в директроии проекта создайте директории `logs`, `plugins`, `config`.
+Создайте файл `.env` в директории `docker` с содержимым `AIRFLOW_UID=50000`
 Далее выполните команды:
 ```
-docker compose up airflow-init
+docker compose build
 docker compose up
 ```
 

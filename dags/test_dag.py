@@ -1,5 +1,6 @@
-from airflow import DAG
 import datetime
+
+from airflow import DAG
 from airflow.operators.empty import EmptyOperator
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 

@@ -1,7 +1,9 @@
+import datetime
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.generic_transfer import GenericTransfer
-import datetime
+
 from scripts import db_utils_transfer
 
 dag = DAG(

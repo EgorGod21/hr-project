@@ -1,6 +1,9 @@
 import logging
+from typing import Optional, List, Dict
+
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import MetaData
+from sqlalchemy.engine import Engine
 
 source_conn_id = 'source_postgres_stage'
 target_conn_id = 'target_postgres_ods'
@@ -8,19 +11,19 @@ schema_name = 'source_data'
 new_schema_name = 'ods'
 
 
-def get_source_engine():
+def get_source_engine() -> Engine:
     """Подключние к общей базе данных"""
     source_hook = PostgresHook(postgres_conn_id=source_conn_id)
     return source_hook.get_sqlalchemy_engine()
 
 
-def get_destination_engine():
+def get_destination_engine() -> Engine:
     """Подключние к собственной базе данных"""
     dest_hook = PostgresHook(postgres_conn_id=target_conn_id)
     return dest_hook.get_sqlalchemy_engine()
 
 
-def _execute_sql(engine, sql_query):
+def _execute_sql(engine: Engine, sql_query: str) -> None:
     """Выполнение запроса к базе данных"""
     try:
         with engine.connect() as connection:
@@ -30,7 +33,7 @@ def _execute_sql(engine, sql_query):
         logging.error(f"Error executing SQL query: {e.args}")
 
 
-def _manage_schema(engine, action, schema_name, new_schema_name=None):
+def _manage_schema(engine: Engine, action: str, schema_name: str, new_schema_name: Optional[str]=None) -> None:
     """Управление схемой базы данных"""
     if action == 'create':
         sql_query = f"CREATE SCHEMA IF NOT EXISTS {schema_name};"
@@ -45,7 +48,7 @@ def _manage_schema(engine, action, schema_name, new_schema_name=None):
     _execute_sql(engine, sql_query)
 
 
-def create_tables():
+def create_tables() -> None:
     """Создание таблиц в собственной базе данных"""
     source_engine = get_source_engine()
     destination_engine = get_destination_engine()
@@ -60,7 +63,7 @@ def create_tables():
     logging.info("Tables created successfully.")
 
 
-def get_table_names():
+def get_table_names() -> List[Dict[str, str]]:
     """Возвращает список таблиц в общей базе данных"""
     source_engine = get_source_engine()
     meta = MetaData(schema=schema_name)

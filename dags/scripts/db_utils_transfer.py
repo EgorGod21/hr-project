@@ -5,22 +5,11 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy import MetaData
 from sqlalchemy.engine import Engine
 
-source_conn_id = 'source_postgres_stage'
-target_conn_id = 'target_postgres_ods'
-schema_name = 'source_data'
-new_schema_name = 'ods'
 
-
-def get_source_engine() -> Engine:
+def get_engine(conn_id: str) -> Engine:
     """Подключние к общей базе данных"""
-    source_hook = PostgresHook(postgres_conn_id=source_conn_id)
-    return source_hook.get_sqlalchemy_engine()
-
-
-def get_destination_engine() -> Engine:
-    """Подключние к собственной базе данных"""
-    dest_hook = PostgresHook(postgres_conn_id=target_conn_id)
-    return dest_hook.get_sqlalchemy_engine()
+    hook = PostgresHook(postgres_conn_id=conn_id)
+    return hook.get_sqlalchemy_engine()
 
 
 def _execute_sql(engine: Engine, sql_query: str) -> None:
@@ -33,7 +22,7 @@ def _execute_sql(engine: Engine, sql_query: str) -> None:
         logging.error(f"Error executing SQL query: {e.args}")
 
 
-def _manage_schema(engine: Engine, action: str, schema_name: str, new_schema_name: Optional[str]=None) -> None:
+def manage_schema(engine: Engine, action: str, schema_name: str, new_schema_name: Optional[str]=None) -> None:
     """Управление схемой базы данных"""
     if action == 'create':
         sql_query = f"CREATE SCHEMA IF NOT EXISTS {schema_name};"
@@ -48,24 +37,20 @@ def _manage_schema(engine: Engine, action: str, schema_name: str, new_schema_nam
     _execute_sql(engine, sql_query)
 
 
-def create_tables() -> None:
+def create_tables(source_engine: Engine, target_engine: Engine, schema_name: str) -> None:
     """Создание таблиц в собственной базе данных"""
-    source_engine = get_source_engine()
-    destination_engine = get_destination_engine()
-
     meta = MetaData(schema=schema_name)
     meta.reflect(bind=source_engine)
 
     logging.info("Creating tables in the destination database...")
     for table in meta.tables.values():
         logging.info(f"Table: {table.name}")
-    meta.create_all(bind=destination_engine)
+    meta.create_all(bind=target_engine)
     logging.info("Tables created successfully.")
 
 
-def get_table_names() -> List[Dict[str, str]]:
+def get_table_names(source_engine: Engine, schema_name: Engine) -> List[Dict[str, str]]:
     """Возвращает список таблиц в общей базе данных"""
-    source_engine = get_source_engine()
     meta = MetaData(schema=schema_name)
     meta.reflect(bind=source_engine)
     array = []

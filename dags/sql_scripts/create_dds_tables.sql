@@ -1,4 +1,6 @@
---1 сотрудники_дар 
+CREATE SCHEMA IF NOT EXISTS dds;
+
+--1 сотрудники_дар
 CREATE TABLE IF NOT EXISTS dds.сотрудники_дар (
 	id INT PRIMARY KEY,
 	"Дата рождения" DATE NULL,

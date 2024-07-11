@@ -16,9 +16,9 @@ source_engine = db_utils_transfer.get_engine(source_conn_id)
 target_engine = db_utils_transfer.get_engine(target_conn_id)
 
 dag = DAG(
-    'db_transfer',
+    'dag_ods_layer',
     start_date=datetime.datetime(2024, 7, 5),
-    description='Transfer all tables from source DB to destination DB',
+    description='Transfer data from stage layer to ods layer',
     schedule_interval=None,
 )
 

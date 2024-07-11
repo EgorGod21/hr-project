@@ -323,21 +323,21 @@ BEGIN
         END) IS NOT NULL 
     AND EXISTS (  
         SELECT 1 FROM dds.сотрудники_дар sd WHERE sd.id = (CASE
-            													WHEN regexp_replace(t1.название, '\D', '', 'g') <> '' THEN regexp_replace(t1.название, '\D', '', 'g')::INT 
-           														ELSE NULL
-        												   END)
+    WHEN regexp_replace(t1.название, '\D', '', 'g') <> '' THEN regexp_replace(t1.название, '\D', '', 'g')::INT
+    ELSE NULL
+END)
     )
 	AND EXISTS (  
         SELECT 1 FROM dds.уровни_владения_ин uz WHERE uz.id = (CASE
-            													    WHEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
-            													    ELSE NULL
-        													   END)
+            WHEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
+            ELSE NULL
+        END)
     )
 	AND EXISTS (  
         SELECT 1 FROM dds.языки db WHERE db.id = (CASE
-            										WHEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
-           											ELSE NULL
-        								          END)
+            WHEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
+            ELSE NULL
+        END)
     )
     AND NOT EXISTS (  
         SELECT 1 FROM dds.языки_пользователей t2 WHERE t1.id = t2.id

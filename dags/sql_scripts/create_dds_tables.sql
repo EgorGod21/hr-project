@@ -1,8 +1,8 @@
-CREATE SCHEMA IF NOT EXISTS dds;
-CREATE SCHEMA IF NOT EXISTS dds_er;
+CREATE SCHEMA IF NOT EXISTS dds_egor;
+CREATE SCHEMA IF NOT EXISTS dds_egor_er;
 
 --1 сотрудники_дар 
-CREATE TABLE IF NOT EXISTS dds.сотрудники_дар (
+CREATE TABLE IF NOT EXISTS dds_egor.сотрудники_дар (
 	id INT PRIMARY KEY,
 	"Дата рождения" DATE NULL,
 	активность TEXT DEFAULT 'да',
@@ -22,13 +22,13 @@ CREATE TABLE IF NOT EXISTS dds.сотрудники_дар (
 );
 
 --2 инструменты
-CREATE TABLE IF NOT EXISTS dds.инструменты (
+CREATE TABLE IF NOT EXISTS dds_egor.инструменты (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.инструменты_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.инструменты_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -36,20 +36,20 @@ CREATE TABLE IF NOT EXISTS dds_er.инструменты_er (
 );
 
 --3 уровни_знаний
-CREATE TABLE IF NOT EXISTS dds.уровни_знаний (
+CREATE TABLE IF NOT EXISTS dds_egor.уровни_знаний (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.уровни_знаний_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.уровни_знаний_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TEXT NULL
 );
 --4 инструменты_и_уровень_знаний_сотр
-CREATE TABLE IF NOT EXISTS dds.инструменты_и_уровень_знаний_сотр (
+CREATE TABLE IF NOT EXISTS dds_egor.инструменты_и_уровень_знаний_сотр (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL, -- что такое название
 	активность TEXT DEFAULT 'да',
@@ -57,11 +57,11 @@ CREATE TABLE IF NOT EXISTS dds.инструменты_и_уровень_знан
 	дата DATE NULL,
 	инструменты INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY (инструменты) REFERENCES dds.инструменты (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY (инструменты) REFERENCES dds_egor.инструменты (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.инструменты_и_уровень_знаний_сотр_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.инструменты_и_уровень_знаний_сотр_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -72,20 +72,20 @@ CREATE TABLE IF NOT EXISTS dds_er.инструменты_и_уровень_зн�
 );
 
 --5 базы_данных 
-CREATE TABLE IF NOT EXISTS dds.базы_данных (
+CREATE TABLE IF NOT EXISTS dds_egor.базы_данных (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL, 
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.базы_данных_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.базы_данных_er (
 	id INT,
 	название TEXT NULL, 
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TEXT NULL
 );
 --6 базы_данных_и_уровень_знаний_сотру
-CREATE TABLE IF NOT EXISTS dds.базы_данных_и_уровень_знаний_сотру (
+CREATE TABLE IF NOT EXISTS dds_egor.базы_данных_и_уровень_знаний_сотру (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL, -- что такое название
 	активность TEXT DEFAULT 'да',
@@ -93,11 +93,11 @@ CREATE TABLE IF NOT EXISTS dds.базы_данных_и_уровень_знан�
 	дата DATE NULL,
 	"Базы данных" INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY ("Базы данных") REFERENCES dds.базы_данных (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Базы данных") REFERENCES dds_egor.базы_данных (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.базы_данных_и_уровень_знаний_сотру_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.базы_данных_и_уровень_знаний_сотру_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -108,44 +108,44 @@ CREATE TABLE IF NOT EXISTS dds_er.базы_данных_и_уровень_зна
 );
 
 --7 языки
-CREATE TABLE IF NOT EXISTS dds.языки (
+CREATE TABLE IF NOT EXISTS dds_egor.языки (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL, 
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.языки_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.языки_er (
 	id INT,
 	название TEXT NULL, 
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TEXT NULL
 );
 --8 уровни_владения_ин
-CREATE TABLE IF NOT EXISTS dds.уровни_владения_ин (
+CREATE TABLE IF NOT EXISTS dds_egor.уровни_владения_ин (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.уровни_владения_ин_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.уровни_владения_ин_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TEXT NULL
 );
 --9 языки_пользователей
-CREATE TABLE IF NOT EXISTS dds.языки_пользователей (
+CREATE TABLE IF NOT EXISTS dds_egor.языки_пользователей (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL, -- что это
 	активность TEXT DEFAULT 'да',
 	"Дата изм." TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	язык INT NOT NULL,
 	"Уровень знаний ин. языка" INT NOT NULL,
-	FOREIGN KEY (язык) REFERENCES dds.языки (id),
-	FOREIGN KEY ("Уровень знаний ин. языка") REFERENCES dds.уровни_владения_ин  (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY (язык) REFERENCES dds_egor.языки (id),
+	FOREIGN KEY ("Уровень знаний ин. языка") REFERENCES dds_egor.уровни_владения_ин  (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.языки_пользователей_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.языки_пользователей_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -155,20 +155,20 @@ CREATE TABLE IF NOT EXISTS dds_er.языки_пользователей_er (
 );
 
 --10 уровень_образования
-CREATE TABLE IF NOT EXISTS dds.уровень_образования (
+CREATE TABLE IF NOT EXISTS dds_egor.уровень_образования (
 	id INT PRIMARY KEY,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.уровень_образования_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.уровень_образования_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TEXT NULL
 );
 --11 образование_пользователей
-CREATE TABLE IF NOT EXISTS dds.образование_пользователей (
+CREATE TABLE IF NOT EXISTS dds_egor.образование_пользователей (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL,
 	активность TEXT DEFAULT 'да',
@@ -180,10 +180,10 @@ CREATE TABLE IF NOT EXISTS dds.образование_пользователей
 	специальность TEXT NULL,
 	квалификация TEXT NULL,
 	"Год окончания" INT NULL,
-	FOREIGN KEY ("Уровень образование") REFERENCES dds.уровень_образования (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Уровень образование") REFERENCES dds_egor.уровень_образования (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.образование_пользователей_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.образование_пользователей_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -198,7 +198,7 @@ CREATE TABLE IF NOT EXISTS dds_er.образование_пользовател�
 );
 
 --12 сертификаты_пользователей
-CREATE TABLE IF NOT EXISTS dds.сертификаты_пользователей (
+CREATE TABLE IF NOT EXISTS dds_egor.сертификаты_пользователей (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL,
 	активность TEXT DEFAULT 'да',
@@ -206,9 +206,9 @@ CREATE TABLE IF NOT EXISTS dds.сертификаты_пользователей
 	"Год сертификата" INT NULL,
 	"Наименование сертификата" TEXT NOT NULL,
 	"Организация, выдавшая сертификат" TEXT NULL,
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.сертификаты_пользователей_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.сертификаты_пользователей_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -219,13 +219,13 @@ CREATE TABLE IF NOT EXISTS dds_er.сертификаты_пользовател�
 );
 
 --13 отрасли
-CREATE TABLE IF NOT EXISTS dds.отрасли (
+CREATE TABLE IF NOT EXISTS dds_egor.отрасли (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.отрасли_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.отрасли_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -233,13 +233,13 @@ CREATE TABLE IF NOT EXISTS dds_er.отрасли_er (
 );
 
 --14 уровни_знаний_в_отрасли
-CREATE TABLE IF NOT EXISTS dds.уровни_знаний_в_отрасли (
+CREATE TABLE IF NOT EXISTS dds_egor.уровни_знаний_в_отрасли (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.уровни_знаний_в_отрасли_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.уровни_знаний_в_отрасли_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS dds_er.уровни_знаний_в_отрасли_er
 );
 
 --15 опыт_сотрудника_в_отраслях
-CREATE TABLE IF NOT EXISTS dds.опыт_сотрудника_в_отраслях (
+CREATE TABLE IF NOT EXISTS dds_egor.опыт_сотрудника_в_отраслях (
 	id INT PRIMARY KEY,
 	"User ID" INT NOT NULL,
 	активность TEXT DEFAULT 'да',
@@ -255,11 +255,11 @@ CREATE TABLE IF NOT EXISTS dds.опыт_сотрудника_в_отраслях
 	дата DATE NULL,
 	отрасли INT NOT NULL,
 	"Уровень знаний в отрасли" INT NOT NULL,
-	FOREIGN KEY (отрасли) REFERENCES dds.отрасли (id),
-	FOREIGN KEY ("Уровень знаний в отрасли") REFERENCES dds.уровни_знаний_в_отрасли (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY (отрасли) REFERENCES dds_egor.отрасли (id),
+	FOREIGN KEY ("Уровень знаний в отрасли") REFERENCES dds_egor.уровни_знаний_в_отрасли (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.опыт_сотрудника_в_отраслях_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.опыт_сотрудника_в_отраслях_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -270,13 +270,13 @@ CREATE TABLE IF NOT EXISTS dds_er.опыт_сотрудника_в_отрасл�
 );
 
 --16 предметная_область
-CREATE TABLE IF NOT EXISTS dds.предметная_область (
+CREATE TABLE IF NOT EXISTS dds_egor.предметная_область (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.предметная_область_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.предметная_область_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -284,13 +284,13 @@ CREATE TABLE IF NOT EXISTS dds_er.предметная_область_er (
 );
 
 --17 уровни_знаний_в_предметной_област
-CREATE TABLE IF NOT EXISTS dds.уровни_знаний_в_предметной_област (
+CREATE TABLE IF NOT EXISTS dds_egor.уровни_знаний_в_предметной_област (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.уровни_знаний_в_предметной_област_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.уровни_знаний_в_предметной_област_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -298,7 +298,7 @@ CREATE TABLE IF NOT EXISTS dds_er.уровни_знаний_в_предметн�
 );
 
 --18 опыт_сотрудника_в_предметных_обла
-CREATE TABLE IF NOT EXISTS dds.опыт_сотрудника_в_предметных_обла (
+CREATE TABLE IF NOT EXISTS dds_egor.опыт_сотрудника_в_предметных_обла (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL,
 	активность TEXT DEFAULT 'да',
@@ -306,11 +306,11 @@ CREATE TABLE IF NOT EXISTS dds.опыт_сотрудника_в_предметн
 	дата DATE NULL,
 	"Предментые области" INT NOT NULL,
 	"Уровень знаний в предметной облас" INT NOT NULL,
-	FOREIGN KEY ("Предментые области") REFERENCES dds.предметная_область (id),
-	FOREIGN KEY ("Уровень знаний в предметной облас") REFERENCES dds.уровни_знаний_в_предметной_област (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Предментые области") REFERENCES dds_egor.предметная_область (id),
+	FOREIGN KEY ("Уровень знаний в предметной облас") REFERENCES dds_egor.уровни_знаний_в_предметной_област (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.опыт_сотрудника_в_предметных_обла_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.опыт_сотрудника_в_предметных_обла_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -321,13 +321,13 @@ CREATE TABLE IF NOT EXISTS dds_er.опыт_сотрудника_в_предме�
 );
 
 --19 платформы
-CREATE TABLE IF NOT EXISTS dds.платформы (
+CREATE TABLE IF NOT EXISTS dds_egor.платформы (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.платформы_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.платформы_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS dds_er.платформы_er (
 );
 
 --20 платформы_и_уровень_знаний_сотруд
-CREATE TABLE IF NOT EXISTS dds.платформы_и_уровень_знаний_сотруд (
+CREATE TABLE IF NOT EXISTS dds_egor.платформы_и_уровень_знаний_сотруд (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL,
 	активность TEXT DEFAULT 'да',
@@ -343,11 +343,11 @@ CREATE TABLE IF NOT EXISTS dds.платформы_и_уровень_знаний
 	дата DATE NULL,
 	платформы INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY (платформы) REFERENCES dds.платформы (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY (платформы) REFERENCES dds_egor.платформы (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.платформы_и_уровень_знаний_сотруд_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.платформы_и_уровень_знаний_сотруд_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -359,13 +359,13 @@ CREATE TABLE IF NOT EXISTS dds_er.платформы_и_уровень_знан�
 
 
 --21 среды_разработки
-CREATE TABLE IF NOT EXISTS dds.среды_разработки (
+CREATE TABLE IF NOT EXISTS dds_egor.среды_разработки (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.среды_разработки_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.среды_разработки_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS dds_er.среды_разработки_er (
 );
 
 --22 среды_разработки_и_уровень_знаний_
-CREATE TABLE IF NOT EXISTS dds.среды_разработки_и_уровень_знаний_ (
+CREATE TABLE IF NOT EXISTS dds_egor.среды_разработки_и_уровень_знаний_ (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL, -- название
 	активность TEXT DEFAULT 'да',
@@ -381,11 +381,11 @@ CREATE TABLE IF NOT EXISTS dds.среды_разработки_и_уровень
 	дата DATE NULL,
 	"Среды разработки" INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY ("Среды разработки") REFERENCES dds.среды_разработки (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Среды разработки") REFERENCES dds_egor.среды_разработки (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.среды_разработки_и_уровень_знаний__er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.среды_разработки_и_уровень_знаний__er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -396,13 +396,13 @@ CREATE TABLE IF NOT EXISTS dds_er.среды_разработки_и_урове�
 );
 
 --23 типы_систем
-CREATE TABLE IF NOT EXISTS dds.типы_систем (
+CREATE TABLE IF NOT EXISTS dds_egor.типы_систем (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.типы_систем_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.типы_систем_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -410,7 +410,7 @@ CREATE TABLE IF NOT EXISTS dds_er.типы_систем_er (
 );
 
 --24 типы_систем_и_уровень_знаний_сотру
-CREATE TABLE IF NOT EXISTS dds.типы_систем_и_уровень_знаний_сотру (
+CREATE TABLE IF NOT EXISTS dds_egor.типы_систем_и_уровень_знаний_сотру (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL, -- название
 	активность TEXT DEFAULT 'да',
@@ -418,11 +418,11 @@ CREATE TABLE IF NOT EXISTS dds.типы_систем_и_уровень_знан�
 	дата DATE NULL,
 	"Типы систем" INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY ("Типы систем") REFERENCES dds.типы_систем (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Типы систем") REFERENCES dds_egor.типы_систем (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.типы_систем_и_уровень_знаний_сотру_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.типы_систем_и_уровень_знаний_сотру_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -433,13 +433,13 @@ CREATE TABLE IF NOT EXISTS dds_er.типы_систем_и_уровень_зна
 );
 
 --25 фреймворки
-CREATE TABLE IF NOT EXISTS dds.фреймворки (
+CREATE TABLE IF NOT EXISTS dds_egor.фреймворки (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.фреймворки_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.фреймворки_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -447,7 +447,7 @@ CREATE TABLE IF NOT EXISTS dds_er.фреймворки_er (
 );
 
 --26 фреймворки_и_уровень_знаний_сотру
-CREATE TABLE IF NOT EXISTS dds.фреймворки_и_уровень_знаний_сотру (
+CREATE TABLE IF NOT EXISTS dds_egor.фреймворки_и_уровень_знаний_сотру (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL, -- название
 	активность TEXT DEFAULT 'да',
@@ -455,11 +455,11 @@ CREATE TABLE IF NOT EXISTS dds.фреймворки_и_уровень_знани
 	дата DATE NULL,
 	фреймворки INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY (фреймворки) REFERENCES dds.фреймворки (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY (фреймворки) REFERENCES dds_egor.фреймворки (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.фреймворки_и_уровень_знаний_сотру_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.фреймворки_и_уровень_знаний_сотру_er (
 	id INT,
 	"User ID" TEXT NULL, 
 	активность TEXT DEFAULT 'да',
@@ -470,13 +470,13 @@ CREATE TABLE IF NOT EXISTS dds_er.фреймворки_и_уровень_зна�
 );
 
 --27 языки_программирования 
-CREATE TABLE IF NOT EXISTS dds.языки_программирования (
+CREATE TABLE IF NOT EXISTS dds_egor.языки_программирования (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.языки_программирования_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.языки_программирования_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -484,7 +484,7 @@ CREATE TABLE IF NOT EXISTS dds_er.языки_программирования_er
 );
 
 --28 языки_программирования_и_уровень
-CREATE TABLE IF NOT EXISTS dds.языки_программирования_и_уровень (
+CREATE TABLE IF NOT EXISTS dds_egor.языки_программирования_и_уровень (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL, -- название
 	активность TEXT DEFAULT 'да',
@@ -492,11 +492,11 @@ CREATE TABLE IF NOT EXISTS dds.языки_программирования_и_у
 	дата DATE NULL,
 	"Языки программирования" INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("Языки программирования") REFERENCES dds.языки_программирования (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("Языки программирования") REFERENCES dds_egor.языки_программирования (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.языки_программирования_и_уровень_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.языки_программирования_и_уровень_er (
 	id INT,
 	"User ID" TEXT NULL, 
 	активность TEXT DEFAULT 'да',
@@ -507,13 +507,13 @@ CREATE TABLE IF NOT EXISTS dds_er.языки_программирования_и
 );
 
 --29 технологии
-CREATE TABLE IF NOT EXISTS dds.технологии (
+CREATE TABLE IF NOT EXISTS dds_egor.технологии (
 	id INT PRIMARY KEY,
 	название TEXT NOT NULL,
 	активность TEXT DEFAULT 'да',
 	"Дата изменения" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS dds_er.технологии_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.технологии_er (
 	id INT,
 	название TEXT NULL,
 	активность TEXT DEFAULT 'да',
@@ -521,7 +521,7 @@ CREATE TABLE IF NOT EXISTS dds_er.технологии_er (
 );
 
 --30 технологии_и_уровень_знаний_сотру
-CREATE TABLE IF NOT EXISTS dds.технологии_и_уровень_знаний_сотру (
+CREATE TABLE IF NOT EXISTS dds_egor.технологии_и_уровень_знаний_сотру (
 	id INT PRIMARY KEY,
 	"User ID" INT NULL, -- название
 	активность TEXT DEFAULT 'да',
@@ -529,11 +529,11 @@ CREATE TABLE IF NOT EXISTS dds.технологии_и_уровень_знани
 	дата DATE NULL,
 	технологии INT NOT NULL,
 	"Уровень знаний" INT NOT NULL,
-	FOREIGN KEY (технологии) REFERENCES dds.технологии (id),
-	FOREIGN KEY ("Уровень знаний") REFERENCES dds.уровни_знаний (id),
-	FOREIGN KEY ("User ID") REFERENCES dds.сотрудники_дар (id)
+	FOREIGN KEY (технологии) REFERENCES dds_egor.технологии (id),
+	FOREIGN KEY ("Уровень знаний") REFERENCES dds_egor.уровни_знаний (id),
+	FOREIGN KEY ("User ID") REFERENCES dds_egor.сотрудники_дар (id)
 );
-CREATE TABLE IF NOT EXISTS dds_er.технологии_и_уровень_знаний_сотру_er (
+CREATE TABLE IF NOT EXISTS dds_egor_er.технологии_и_уровень_знаний_сотру_er (
 	id INT,
 	"User ID" TEXT NULL,
 	активность TEXT DEFAULT 'да',

@@ -114,7 +114,7 @@ BEGIN
         SELECT 
             t1.id,
             CASE
-                WHEN regexp_replace(t1.название, ''\D'', '''', ''g'') <> '''' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT 
+                WHEN t1.название ~ ''\D'' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT
                 ELSE NULL
             END AS "User ID",
             COALESCE(NULLIF(t1.активность, ''''), ''да'') AS активность,
@@ -127,42 +127,42 @@ BEGIN
                 ELSE NULL 
             END AS дата,
             CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END AS %I,
             CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END AS %I
         FROM ods.%I t1
         WHERE t1.id IS NOT NULL
         AND (CASE
-                WHEN regexp_replace(t1.название, ''\D'', '''', ''g'') <> '''' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT 
+                WHEN t1.название ~ ''\D'' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT
                 ELSE NULL
             END) IS NOT NULL
         AND (CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END) IS NOT NULL 
         AND (CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END) IS NOT NULL 
         AND EXISTS (  
             SELECT 1 FROM dds.сотрудники_дар sd WHERE sd.id = (CASE
-                    WHEN regexp_replace(t1.название, ''\D'', '''', ''g'') <> '''' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT 
+                    WHEN t1.название ~ ''\D'' THEN regexp_replace(t1.название, ''\D'', '''', ''g'')::INT
                     ELSE NULL
                 END)
         )
         AND EXISTS (  
             SELECT 1 FROM dds.%I fk1 WHERE fk1.id = (CASE
-                    WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                    WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                     ELSE NULL
                 END)
         )
         AND EXISTS (  
             SELECT 1 FROM dds.%I fk2 WHERE fk2.id = (CASE
-                    WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                    WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                     ELSE NULL
                 END)
         )
@@ -221,22 +221,22 @@ BEGIN
                 ELSE NULL 
             END AS дата,
             CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END AS %I,
             CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END AS %I
         FROM ods.%I t1
         WHERE t1.id IS NOT NULL
         AND t1."User ID" IS NOT NULL
         AND (CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*''\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END) IS NOT NULL 
         AND (CASE
-                WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                 ELSE NULL
             END) IS NOT NULL 
         AND EXISTS (  
@@ -244,13 +244,13 @@ BEGIN
         )
         AND EXISTS (  
             SELECT 1 FROM dds.%I fk1 WHERE fk1.id = (CASE
-                    WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                    WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                     ELSE NULL
                 END)
         )
         AND EXISTS (  
             SELECT 1 FROM dds.%I fk2 WHERE fk2.id = (CASE
-                    WHEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'') <> '''' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT 
+                    WHEN t1.%I ~ ''.*\[(\d+)\].*'' THEN regexp_replace(t1.%I, ''.*\[(\d+)\].*'', ''\1'')::INT
                     ELSE NULL
                 END)
         )
@@ -291,7 +291,7 @@ BEGIN
     SELECT 
         t1.id,
 		CASE
-    		WHEN regexp_replace(t1.название, '\D', '', 'g') <> '' THEN regexp_replace(t1.название, '\D', '', 'g')::INT 
+    		WHEN t1.название ~ '\D' THEN regexp_replace(t1.название, '\D', '', 'g')::INT
     		ELSE NULL
 		END AS "User ID",
         COALESCE(NULLIF(t1.активность, ''), 'да') AS активность,
@@ -300,42 +300,42 @@ BEGIN
             ELSE CURRENT_TIMESTAMP(0)
         END AS "Дата изм.",
 		CASE
-    		WHEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
+    		WHEN t1.язык ~ '.*\[(\d+)\].*' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
     		ELSE NULL
 		END AS язык,
 		CASE
-    		WHEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT 
+    		WHEN t1."Уровень знаний ин. языка" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
     		ELSE NULL
 		END AS "Уровень знаний ин. языка"
     FROM ods.языки_пользователей t1
     WHERE t1.id IS NOT NULL
 	AND (CASE
-            WHEN regexp_replace(t1.название, '\D', '', 'g') <> '' THEN regexp_replace(t1.название, '\D', '', 'g')::INT 
+            WHEN t1.название ~ '\D' THEN regexp_replace(t1.название, '\D', '', 'g')::INT
             ELSE NULL
         END) IS NOT NULL
 	AND (CASE
-            WHEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT 
+            WHEN t1."Уровень знаний ин. языка" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
             ELSE NULL
         END) IS NOT NULL 
 	AND (CASE
-            WHEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT 
+            WHEN t1.язык ~ '.*\[(\d+)\].*' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
             ELSE NULL
         END) IS NOT NULL 
     AND EXISTS (  
         SELECT 1 FROM dds.сотрудники_дар sd WHERE sd.id = (CASE
-    WHEN regexp_replace(t1.название, '\D', '', 'g') <> '' THEN regexp_replace(t1.название, '\D', '', 'g')::INT
+    WHEN t1.название ~ '\D' THEN regexp_replace(t1.название, '\D', '', 'g')::INT
     ELSE NULL
 END)
     )
 	AND EXISTS (  
         SELECT 1 FROM dds.уровни_владения_ин uz WHERE uz.id = (CASE
-            WHEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
+            WHEN t1."Уровень знаний ин. языка" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень знаний ин. языка", '.*\[(\d+)\].*', '\1')::INT
             ELSE NULL
         END)
     )
 	AND EXISTS (  
         SELECT 1 FROM dds.языки db WHERE db.id = (CASE
-            WHEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
+            WHEN t1.язык ~ '.*\[(\d+)\].*' THEN regexp_replace(t1.язык, '.*\[(\d+)\].*', '\1')::INT
             ELSE NULL
         END)
     )
@@ -418,7 +418,7 @@ BEGIN
                 ELSE CURRENT_TIMESTAMP(0)
             END AS "Дата изм.",
             CASE
-                WHEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT
+                WHEN t1."Уровень образование" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT
                 ELSE NULL
             END AS "Уровень образование",
             NULLIF(t1."Название учебного заведения", '') AS "Название учебного заведения",
@@ -434,7 +434,7 @@ BEGIN
         WHERE t1.id IS NOT NULL
         AND t1."User ID" IS NOT NULL
         AND (CASE
-                WHEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT 
+                WHEN rt1."Уровень образование" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT
                 ELSE NULL
             END) IS NOT NULL 
         AND EXISTS (  
@@ -442,7 +442,7 @@ BEGIN
         )
         AND EXISTS (  
             SELECT 1 FROM dds.уровень_образования fk1 WHERE fk1.id = (CASE
-                    WHEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1') <> '' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT 
+                    WHEN t1."Уровень образование" ~ '.*\[(\d+)\].*' THEN regexp_replace(t1."Уровень образование", '.*\[(\d+)\].*', '\1')::INT
                     ELSE NULL
                 END)
         )

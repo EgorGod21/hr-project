@@ -3,7 +3,6 @@ import functools
 import typing as t
 
 import pandas as pd
-from sqlalchemy.engine import Engine
 
 from layers.abs_transform_ruler import TransformRules
 
@@ -16,43 +15,43 @@ class DDSTransformRules(TransformRules):
     # Словарь для хранения связей между таблицами и функциями трансформации
     comparison_tables_and_transformation_rules: t.Dict[str, t.Callable] = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
+        # Информация из источника данных
+        self.source_data: t.Dict[str, pd.DataFrame] = {}
+
         # Вызов метода для инициализации словаря связей
         self.__invoke_all_transform_methods()
 
     def run_transform_rule_for_table(
             self,
-            table: str,
-            data: pd.DataFrame,
-            engine: Engine
+            table: str
     ) -> pd.DataFrame:
         """
         Запуск правила трансформации для указанной таблицы.
 
         :param table: Название таблицы.
         :type table: str
-        :param data: Данные для трансформации.
-        :type data: pd.DataFrame
-        :param engine: SQLAlchemy движок для взаимодействия с базой данных.
-        :type engine: Engine
         :return: Трансформированные данные.
         :rtype: pd.DataFrame
         """
-        data_copy: pd.DataFrame = data.copy()
+        data_copy: pd.DataFrame = self.source_data[table].copy()
         if transform_fun := self.comparison_tables_and_transformation_rules.get(table):
-            return transform_fun(self, data_copy, engine)
+            return transform_fun(self, data_copy)
         else:
             return data_copy
+
+    def set_source_data(self, source_data: t.Dict[str, pd.DataFrame]) -> None:
+        self.source_data = source_data
 
     def __invoke_all_transform_methods(self) -> None:
         """
         Вызов методов трансформации, определенных в классе для инициализации словаря.
 
-        Метод находит все методы, начинающиеся с 'transform_', и вызывает их.
+        Метод находит все методы, начинающиеся с '__transform_', и вызывает их.
         """
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
-            if name.startswith('transform_'):
-                method(None, None)
+            if name.startswith('_transform_'):
+                method(None)
 
     @staticmethod
     def __register_transform(table: str) -> t.Callable:
@@ -74,16 +73,17 @@ class DDSTransformRules(TransformRules):
         return decorator
 
     @__register_transform(table='сотрудники_дар')
-    def transform_employee_dar(
+    def _transform_employee_dar(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'сотрудники_дар'"""
         if data is not None:
+            #  Замена название 'подразделения' на корректное
             data['подразделения'] = data['подразделения'].apply(
                 lambda x: x.replace('.', '').strip()
             )
+
             data['Дата рождения'] = data['Дата рождения'].replace('', None)
             data['Последняя авторизация'] = data['Последняя авторизация'].replace('', None)
             data['Дата регистрации'] = data['Дата регистрации'].replace('', None)
@@ -92,10 +92,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='базы_данных')
-    def transform_databases(
+    def _transform_databases(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'базы_данных'"""
         if data is not None:
@@ -111,14 +110,13 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='базы_данных_и_уровень_знаний_сотру')
-    def transform_employee_databases_knowlege(
+    def _transform_employee_databases_knowlege(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'базы_данных_и_уровень_знаний_сотру'"""
         if data is not None:
-            # Заменяем название столбца 'название' на 'User ID'
+                # Заменяем название столбца 'название' на 'User ID'
             if 'название' in data.columns:
                 data = data.rename(columns={'название': 'User ID'})
 
@@ -150,17 +148,16 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
             return data
 
     @__register_transform(table='инструменты')
-    def transform_tools(
+    def _transform_tools(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'инструменты'"""
         if data is not None:
@@ -171,14 +168,12 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='инструменты_и_уровень_знаний_сотр')
-    def transform_tools_knowlege(
+    def _transform_tools_knowlege(
             self,
             data: pd.DataFrame,
-            engine: Engine
     ) -> pd.DataFrame:
         """Трансформация данных для 'инструменты_и_уровень_знаний_сотр'"""
         if data is not None:
-
             # Заменяем название столбца 'название' на 'User ID'
             if 'название' in data.columns:
                 data = data.rename(columns={'название': 'User ID'})
@@ -205,17 +200,16 @@ class DDSTransformRules(TransformRules):
             data['дата'] = data['дата'].replace('', None)
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
             return data
 
     @__register_transform(table='образование_пользователей')
-    def transform_user_education(
+    def _transform_user_education(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'образование_пользователей'"""
         if data is not None:
@@ -251,21 +245,19 @@ class DDSTransformRules(TransformRules):
             data.loc[mask, 'квалификация'] = ''
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
             return data
 
     @__register_transform(table='опыт_сотрудника_в_отраслях')
-    def transform_employee_experience_industries(
+    def _transform_employee_experience_industries(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'опыт_сотрудника_в_отраслях'"""
         if data is not None:
-
             # Удаление из data столбца 'Сорт.'
             if 'Сорт.' in data.columns:
                 data = data.drop(columns=['Сорт.'])
@@ -283,7 +275,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний в отрасли'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -292,14 +284,12 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='опыт_сотрудника_в_предметных_обла')
-    def transform_employee_experience_subject_area(
+    def _transform_employee_experience_subject_area(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'опыт_сотрудника_в_предметных_обла'"""
         if data is not None:
-
             # Удаление из data столбца 'Сорт.'
             if 'Сорт.' in data.columns:
                 data = data.drop(columns=['Сорт.'])
@@ -320,7 +310,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний в предметной облас'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -329,10 +319,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='отрасли')
-    def transform_industry(
+    def _transform_industry(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'отрасли'"""
         if data is not None:
@@ -343,10 +332,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='платформы')
-    def transform_platforms(
+    def _transform_platforms(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'платформы'"""
         if data is not None:
@@ -357,10 +345,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='платформы_и_уровень_знаний_сотруд')
-    def transform_platforms_knowledge(
+    def _transform_platforms_knowledge(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'платформы_и_уровень_знаний_сотруд'"""
         if data is not None:
@@ -380,7 +367,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -389,10 +376,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='предметная_область')
-    def transform_subject_area(
+    def _transform_subject_area(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'предметная_область'"""
         if data is not None:
@@ -403,10 +389,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='сертификаты_пользователей')
-    def transform_user_certificates(
+    def _transform_user_certificates(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'сертификаты_пользователей'"""
         if data is not None:
@@ -415,17 +400,16 @@ class DDSTransformRules(TransformRules):
                 data = data.drop(columns=['Сорт.'])
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
             return data
 
     @__register_transform(table='среды_разработки')
-    def transform_development_environments(
+    def _transform_development_environments(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'среды_разработки'"""
         if data is not None:
@@ -436,10 +420,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='среды_разработки_и_уровень_знаний_')
-    def transform_development_environments_knowledge(
+    def _transform_development_environments_knowledge(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'среды_разработки_и_уровень_знаний_'"""
         if data is not None:
@@ -466,7 +449,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -475,10 +458,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='технологии')
-    def transform_technologies(
+    def _transform_technologies(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'технологии'"""
         if data is not None:
@@ -486,13 +468,17 @@ class DDSTransformRules(TransformRules):
             if 'Сорт.' in data.columns:
                 data = data.drop(columns=['Сорт.'])
 
+            # Заменяем название в столбце 'название' на существующее
+            data['название'] = data['название'].apply(
+                lambda x: x.replace("]", "")
+                )
+
             return data
 
     @__register_transform(table='технологии_и_уровень_знаний_сотру')
-    def transform_technologies_knowledge(
+    def _transform_technologies_knowledge(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'технологии_и_уровень_знаний_сотру'"""
         if data is not None:
@@ -519,7 +505,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -528,10 +514,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='типы_систем')
-    def transform_systems(
+    def _transform_systems(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'типы_систем'"""
         if data is not None:
@@ -542,10 +527,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='типы_систем_и_уровень_знаний_сотру')
-    def transform_systems_knowledge(
+    def _transform_systems_knowledge(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'типы_систем_и_уровень_знаний_сотру'"""
         if data is not None:
@@ -572,7 +556,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -581,10 +565,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='уровень_образования')
-    def transform_education_level(
+    def _transform_education_level(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'уровень_образования'"""
         if data is not None:
@@ -595,10 +578,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='уровни_владения_ин')
-    def transform_foreign_language_levels(
+    def _transform_foreign_language_levels(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'уровни_владения_ин'"""
         if data is not None:
@@ -609,10 +591,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='уровни_знаний')
-    def transform_knowledge_levels(
+    def _transform_knowledge_levels(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'уровни_знаний'"""
         if data is not None:
@@ -623,10 +604,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='уровни_знаний_в_отрасли')
-    def transform_knowledge_levels_industry(
+    def _transform_knowledge_levels_industry(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'уровни_знаний_в_отрасли'"""
         if data is not None:
@@ -637,10 +617,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='уровни_знаний_в_предметной_област')
-    def transform_levels_knowledge_subject_area(
+    def _transform_levels_knowledge_subject_area(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'уровни_знаний_в_предметной_област'"""
         if data is not None:
@@ -651,10 +630,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='фреймворки')
-    def transform_frameworks(
+    def _transform_frameworks(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'фреймворки'"""
         if data is not None:
@@ -665,10 +643,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='фреймворки_и_уровень_знаний_сотру')
-    def transform_frameworks_level(
+    def _transform_frameworks_level(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'фреймворки_и_уровень_знаний_сотру'"""
         if data is not None:
@@ -695,7 +672,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
@@ -704,10 +681,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='языки')
-    def transform_languages(
+    def _transform_languages(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'языки'"""
         if data is not None:
@@ -718,10 +694,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='языки_пользователей')
-    def transform_languages_users(
+    def _transform_languages_users(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'языки_пользователей'"""
         if data is not None:
@@ -751,17 +726,16 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний ин. языка'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 
             return data
 
     @__register_transform(table='языки_программирования')
-    def transform_programming_languages(
+    def _transform_programming_languages(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'языки_программирования'"""
         if data is not None:
@@ -772,10 +746,9 @@ class DDSTransformRules(TransformRules):
             return data
 
     @__register_transform(table='языки_программирования_и_уровень')
-    def transform_programming_languages_levels(
+    def _transform_programming_languages_levels(
             self,
-            data: pd.DataFrame,
-            engine: Engine
+            data: pd.DataFrame
     ) -> pd.DataFrame:
         """Трансформация данных для 'языки_программирования_и_уровень'"""
         if data is not None:
@@ -803,7 +776,7 @@ class DDSTransformRules(TransformRules):
             data = data[data['Уровень знаний'] != '']
 
             # Удаление строк из data, если id не входит в id сотрудники_дар
-            table_data = pd.read_sql_query('SELECT * FROM ods_ira."сотрудники_дар"', engine)
+            table_data = self.source_data['сотрудники_дар'].copy()
             valid_ids = set(table_data['id'])
             data = data[data['User ID'].isin(valid_ids)]
 

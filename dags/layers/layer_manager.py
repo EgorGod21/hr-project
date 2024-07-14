@@ -32,15 +32,24 @@ class LayerManager:
             target_engine: Engine,
             target_schema: str
     ):
-        for source_table, target_table in zip(source_tables, target_tables):
-            # Реализация процесса выгрузки данных [Extract]
-            source_data: pd.DataFrame = pd.read_sql_table(
+        source_data: t.Dict[str, pd.DataFrame] = dict()
+
+        # Получение данных из источника [Extract]: реализация процесса выгрузки данных
+        for source_table in source_tables:
+            # Извлечение данных конкретного столбца из источника
+            data: pd.DataFrame = pd.read_sql_table(
                 source_table, source_engine, schema=source_schema
             )
+            # Сохранение данных источника в словарь
+            source_data[source_table] = data
 
+        self.rules.set_source_data(source_data)
+
+        # Трансформация и загрузка данных в таргетную таблицу: [Transform] и [Load]
+        for target_table in target_tables:
             # Реализация процесса трансформации даннных [Transform]
             transformed_data: pd.DataFrame = self.rules.run_transform_rule_for_table(
-                target_table, source_data, source_engine
+                target_table
             )
 
             # Реализация процесса загрузки данных [Load]

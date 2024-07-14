@@ -8,7 +8,7 @@
 
 - **README.md** является описательным и содержит инструкции по запуску и настройке Apache Airflow в Docker-контейнерах с использованием Docker Compose.
 
-## dags
+### dags
 Каталог dags содержит каталог layers, а также файлы init_dags.py и dags.py
 
 -**init_dags.py**

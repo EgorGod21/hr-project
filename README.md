@@ -15,7 +15,7 @@
 
 Каталог layers содержит файлы layer_manager.py и abs_transform_ruler.py, а также каталоги слоев ods, dds и dm.
 
-## layer_manager.py
+### layer_manager.py
 
 layer_manager.py реализует ETL-процесс для управления данными между базами данных. 
 

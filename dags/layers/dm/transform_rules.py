@@ -16,6 +16,9 @@ class DMTransformRules(t_manager := TransformRulesManager):
         """
         Трансформация данных для 'сотрудники_дар'.
         """
+        # Удаление строк, где 'активность' равна 'Нет' или 'цфо' не равно 'DAR'
+        data = data[(data['активность'] != 'Нет') & (data['цфо'] == 'DAR')]
+        
         # Удаление ненужных столбцов
         columns_to_drop = [
             'Дата рождения', 'пол', 'Последняя авторизация', 'Дата регистрации',
@@ -27,9 +30,6 @@ class DMTransformRules(t_manager := TransformRulesManager):
             inplace=True,
             errors='ignore'
         )
-
-        # Удаление строк, где 'активность' равна 'Нет' или 'цфо' не равно 'DAR'
-        data = data[(data['активность'] != 'Нет') & (data['цфо'] == 'DAR')]
 
         # Замена вариаций должностей на стандартные наименования
         data['должность'] = self._standardize_positions(data['должность'])

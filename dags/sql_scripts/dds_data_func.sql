@@ -39,7 +39,10 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION insert_4_col_dds_egor(tab_name text)
+-- после выполнения следующих функций "битые" данные будут хранится в схеме dds_egor_er
+
+-- заполняет таблицу в dds слое, у которой 4 признака (id, название, активность, "Дата изм.")
+CREATE OR REPLACE FUNCTION _insert_4_col_dds_egor(tab_name text)
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
     EXECUTE format(
@@ -75,12 +78,13 @@ BEGIN
 			        FROM dds_egor.%I t2 
 			        WHERE t1.id != t2.id
 			    );',
-        tab_name || '_er', tab_name, tab_name
+        tab_name, tab_name, tab_name
     );
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION create_insert_4_col_dds_egor()
+-- заполняет все таблицы dds слоя, которые имеют по 4 признака
+CREATE OR REPLACE FUNCTION insert_4_col_all_tables_dds_egor()
 RETURNS void LANGUAGE plpgsql AS $$
 DECLARE
     tab_name text;
@@ -95,17 +99,19 @@ DECLARE
 BEGIN
     FOREACH tab_name IN ARRAY tab_names
     LOOP
-        PERFORM insert_4_col_dds_egor(tab_name);
+        PERFORM _insert_4_col_dds_egor(tab_name);
     END LOOP;
 END;
 $$;
 
+-- заполняет таблицу слоя dds, у которой 7 признаков (id, "User ID", активность, "Дата изм.", дата и 2 признака
+-- зависят от заполняемой таблицы)
 CREATE OR REPLACE FUNCTION insert_7_col_dds_egor(
-    main_table text,
-    field_fk1 text,
-    table_fk1 text,
-    field_fk2 text,
-    table_fk2 text
+    main_table text, -- название таблицы слоя ods и dds, у которой в поле "название" содержится "User ID"
+    field_fk1 text, -- имя первого связанного поля
+    table_fk1 text, -- имя первой связанной таблицы
+    field_fk2 text, -- имя второго связанного поля
+    table_fk2 text -- имя второй связанной таблицы
 )
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
@@ -191,18 +197,20 @@ BEGIN
             FROM dds_egor.%I t2 
             WHERE t1.id = t2.id
         );',
-        main_table || '_er', field_fk1, field_fk2,
+        main_table, field_fk1, field_fk2,
         main_table, main_table
     );
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION insert_7_col_uid_int_dds_egor(
-    main_table text,
-    field_fk1 text,
-    table_fk1 text,
-    field_fk2 text,
-    table_fk2 text
+-- заполняет таблицу слоя dds, у которой 7 признаков (id, "User ID", активность, "Дата изм.", дата и 2 признака
+-- зависят от заполняемой таблицы)
+CREATE OR REPLACE FUNCTION insert_7_col_user_id_int_dds_egor(
+    main_table text, -- название таблицы слоя ods и dds, у которой присутствует поле "User ID"
+    field_fk1 text, -- имя первого связанного поля
+    table_fk1 text, -- имя первой связанной таблицы
+    field_fk2 text, -- имя второго связанного поля
+    table_fk2 text -- имя второй связанной таблицы
 )
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
@@ -278,7 +286,7 @@ BEGIN
             FROM dds_egor.%I t2 
             WHERE t1.id = t2.id
         );',
-        main_table || '_er', field_fk1, field_fk2,
+        main_table, field_fk1, field_fk2,
         main_table, main_table
     );
 END;
@@ -342,7 +350,7 @@ END)
     AND NOT EXISTS (  
         SELECT 1 FROM dds_egor.языки_пользователей t2 WHERE t1.id = t2.id
     );
-	INSERT INTO dds_egor_er.языки_пользователей_er
+	INSERT INTO dds_egor_er.языки_пользователей
         SELECT 
             t1.id,
             t1.название::TEXT,
@@ -387,7 +395,7 @@ BEGIN
     AND NOT EXISTS (  
         SELECT 1 FROM dds_egor.сертификаты_пользователей t2 WHERE t1.id = t2.id
     );
-	INSERT INTO dds_egor_er.сертификаты_пользователей_er
+	INSERT INTO dds_egor_er.сертификаты_пользователей
         SELECT 
             t1.id,
             t1."User ID"::TEXT,
@@ -449,7 +457,7 @@ BEGIN
         AND NOT EXISTS (  
             SELECT 1 FROM dds_egor.образование_пользователей t2 WHERE t1.id = t2.id
         );
-	INSERT INTO dds_egor_er.образование_пользователей_er
+	INSERT INTO dds_egor_er.образование_пользователей
         SELECT 
             t1.id,
             t1."User ID"::TEXT,
@@ -468,17 +476,5 @@ BEGIN
             FROM dds_egor.образование_пользователей t2 
             WHERE t1.id = t2.id
         );
-
-		UPDATE dds_egor."образование_пользователей"
-			SET 
-			    квалификация = CASE
-			        WHEN специальность IN ('бакалавр', 'специалист', 'магистр') AND квалификация IS NULL THEN специальность
-			        ELSE квалификация
-			    END,
-			    специальность = CASE
-			        WHEN специальность IN ('бакалавр', 'специалист', 'магистр') AND квалификация IS NULL THEN NULL
-			        ELSE специальность
-			    END
-			WHERE специальность IN ('бакалавр', 'специалист', 'магистр') AND квалификация IS NULL;
 END;
 $$;

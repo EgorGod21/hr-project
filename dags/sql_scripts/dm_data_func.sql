@@ -20,22 +20,63 @@ BEGIN
             цфо
         FROM dds_egor.сотрудники_дар
         WHERE цфо = 'DAR'
-			AND активность = 'Да'
+        AND активность = 'Да'
+    ),
+    classified_roles_clean AS (
+        SELECT
+            t1.id,
+            t1.фамилия,
+            t1.имя,
+            t1."должность"
+        FROM classified_roles t1
+        WHERE t1."должность" IS NOT NULL
+        AND t1.активность = 'Да'
+        AND NOT EXISTS (
+            SELECT 1 FROM dm_egor.сотрудники_дар t2 WHERE t1.id = t2.ID_сотрудника
+        )
     )
-    INSERT INTO dm_egor.сотрудники_дар
+    INSERT INTO dm_egor.сотрудники_дар (ID_сотрудника, Фамилия, Имя, Роль, Общее_количество, Количество_по_должности)
     SELECT
-        t1.id,
-        t1.активность,
-        t1.фамилия,
-        t1.имя,
-        t1."должность",
-        t1.цфо
-    FROM classified_roles t1
-    WHERE t1."должность" IS NOT NULL
-	AND t1.активность = 'Да'
-	AND NOT EXISTS (
-        SELECT 1 FROM dm_egor.сотрудники_дар t2 WHERE t1.id = t2.id
-    );
+        crc.id,
+        crc.фамилия,
+        crc.имя,
+        crc."должность",
+        (SELECT count(*) FROM classified_roles_clean) AS total_number,
+        COUNT(*) OVER (PARTITION BY должность) AS number_by_position
+    FROM classified_roles_clean crc;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION уровни_знаний_dm_egor()
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO dm_egor.уровни_знаний
+    SELECT
+       t1.id,
+       t1.название
+    FROM dds_egor.уровни_знаний t1
+	WHERE NOT EXISTS (
+	SELECT 1 FROM dm_egor.уровни_знаний t2 WHERE t1.id = t2.ID_уровня
+	);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION группы_навыков_dm_egor()
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+	CREATE UNIQUE INDEX IF NOT EXISTS уникальный_группа_навыков
+	ON dm_egor.группы_навыков ("Группа_навыков");
+    INSERT INTO dm_egor.группы_навыков ("Группа_навыков")
+	VALUES
+	('Инструменты'),
+	('Базы данных'),
+	('Платформы'),
+	('Среды разработки'),
+	('Типы систем'),
+	('Фреймворки'),
+	('Языки программирования'),
+	('Технологии')
+    ON CONFLICT ("Группа_навыков") DO NOTHING;
 END;
 $$;
 
@@ -43,15 +84,16 @@ CREATE OR REPLACE FUNCTION insert_4_col_dm_egor(tab_name text)
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
     EXECUTE format(
-        'INSERT INTO dm_egor.%I
+        'INSERT INTO dm_egor.навыки
         SELECT
             t1.id,
             t1.название
         FROM dds_egor.%I t1
-		WHERE NOT EXISTS (
-            SELECT 1 FROM dm_egor.%I t2 WHERE t1.id = t2.id
+		WHERE t1.название != ''Другое''
+		AND NOT EXISTS (
+            SELECT 1 FROM dm_egor.навыки t2 WHERE t1.id = t2.ID_навыка
         );',
-        tab_name, tab_name, tab_name
+        tab_name
     );
 END;
 $$;
@@ -61,7 +103,7 @@ RETURNS void LANGUAGE plpgsql AS $$
 DECLARE
     tab_name text;
     tab_names text[] := ARRAY[
-        'инструменты', 'уровни_знаний', 'базы_данных', 'платформы',
+        'инструменты', 'базы_данных', 'платформы',
         'среды_разработки', 'типы_систем', 'фреймворки',
         'языки_программирования', 'технологии'
     ];
@@ -73,41 +115,61 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION insert_7_col_uid_int_dm_egor(
+CREATE OR REPLACE FUNCTION группы_навыков_и_уровень_знаний_сотруд_dm_egor(
     main_table text,
-    field_fk1 text,
-    table_fk1 text
-)
-RETURNS void LANGUAGE plpgsql AS $$
+	field_fk1 text,
+    table_fk1 text,
+    p_group_number INT
+) RETURNS void AS $$
 BEGIN
     EXECUTE format(
-        'INSERT INTO dm_egor.%I
-        SELECT
-            t1.id,
-            t1."User ID",
-            t1.активность,
-            t1."Дата изм.",
-            CASE
-                WHEN t1.дата IS NULL THEN DATE(t1."Дата изм.")
-                ELSE t1.дата
-            END AS дата,
-            t1.%I,
-            t1."Уровень знаний"
-        FROM dds_egor.%I t1
-        WHERE t1.активность = ''Да''
-        AND EXISTS (
-            SELECT 1 FROM dm_egor.сотрудники_дар sd WHERE sd.id = t1."User ID"
+        'WITH ranked_skills AS (
+            SELECT
+                t1.id,
+                t1."Дата изм.",
+                CASE
+                    WHEN t1.дата IS NULL THEN DATE(t1."Дата изм.")
+                    ELSE t1.дата
+                END AS Дата,
+                t1."User ID",
+                t1.%I AS "Навыки",
+                t1."Уровень знаний",
+                %L::INT AS Группа_навыков,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "User ID", t1.%I, t1.дата, t1."Дата изм."
+                    ORDER BY
+                    CASE t2.Название
+                        WHEN ''Novice'' THEN 1
+                        WHEN ''Junior'' THEN 2
+                        WHEN ''Middle'' THEN 3
+                        WHEN ''Senior'' THEN 4
+                        WHEN ''Expert'' THEN 5
+                        WHEN ''Использовал на проекте'' THEN 6
+                        ELSE 0
+                    END DESC
+                ) AS rank
+            FROM dds_egor.%I t1
+            INNER JOIN dm_egor.уровни_знаний t2 ON t2.ID_уровня = t1."Уровень знаний"
+            INNER JOIN dds_egor.%I t3 ON t1.%I = t3.id
+            WHERE t1.активность = ''Да'' AND t3.название != ''Другое''
         )
-        AND EXISTS (
-            SELECT 1 FROM dm_egor.%I fk1 WHERE fk1.id = t1.%I
-        )
-        AND EXISTS (
-            SELECT 1 FROM dm_egor.уровни_знаний fk2 WHERE fk2.id = t1."Уровень знаний"
+        INSERT INTO dm_egor.группы_навыков_и_уровень_знаний_сотруд
+		SELECT rs.id,
+               rs."Дата изм.",
+               rs.Дата,
+               rs."User ID",
+			   rs.Группа_навыков,
+               rs."Навыки",
+               rs."Уровень знаний"
+        FROM ranked_skills rs
+        WHERE rs.rank = 1
+		AND EXISTS (
+            SELECT 1 FROM dm_egor.сотрудники_дар sd WHERE sd.ID_сотрудника = rs."User ID"
         )
         AND NOT EXISTS (
-            SELECT 1 FROM dm_egor.%I t2 WHERE t1.id = t2.id
+            SELECT 1 FROM dm_egor.группы_навыков_и_уровень_знаний_сотруд t2 WHERE rs.id = t2.id
         );',
-        main_table, field_fk1, main_table, table_fk1, field_fk1, main_table
+        field_fk1, p_group_number, field_fk1, main_table, table_fk1, field_fk1
     );
 END;
-$$;
+$$ LANGUAGE plpgsql;

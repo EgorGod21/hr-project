@@ -5,9 +5,7 @@ CREATE TABLE IF NOT EXISTS dm_egor.сотрудники_дар (
 	ID_сотрудника INT PRIMARY KEY,
 	Фамилия TEXT,
 	Имя TEXT,
-	Роль TEXT NOT NULL,
-    Общее_количество INT,
-    Количество_по_должности INT
+	Роль TEXT NOT NULL
 );
 
 -- 2 группы_навыков

@@ -22,7 +22,7 @@ with open(os.path.join(dag_folder, "sql_scripts/dds_data_func.sql"), 'r', encodi
     dds_data_func = f.read()
 
 with open(os.path.join(dag_folder, "sql_scripts/run_dds_data_func.sql"), 'r', encoding='utf-8') as f:
-    run_dds_data_func = f.read()
+    run_dds_data_func = f.read().split('\n')
 
 create_schemes_and_tables_task = PostgresOperator(
     task_id='create_tables',
@@ -38,11 +38,20 @@ create_functions_task = PostgresOperator(
     dag=dag,
 )
 
-run_functions_task = PostgresOperator(
-    task_id='run_functions',
+run_functions_non_par_task = PostgresOperator(
+    task_id='run_functions_non_par',
     postgres_conn_id=target_conn_id,
-    sql=run_dds_data_func,
+    sql='''SELECT сотрудники_дар_dds_egor();
+        SELECT insert_4_col_all_tables_dds_egor();''',
     dag=dag,
 )
 
-create_schemes_and_tables_task >> create_functions_task >> run_functions_task
+for idx, task in enumerate(run_dds_data_func):
+    run_functions_par_task = PostgresOperator(
+        task_id=f'run_functions_par_{idx + 1}',
+        postgres_conn_id=target_conn_id,
+        sql=task,
+        dag=dag,
+    )
+    create_schemes_and_tables_task >> create_functions_task >> run_functions_non_par_task >> run_functions_par_task
+

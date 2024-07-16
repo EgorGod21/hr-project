@@ -1,3 +1,4 @@
+DROP SCHEMA IF EXISTS dm_egor CASCADE;
 CREATE SCHEMA IF NOT EXISTS dm_egor;
 
 -- 1 сотрудники_дар

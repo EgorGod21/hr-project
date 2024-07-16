@@ -47,7 +47,8 @@ BEGIN
     FROM dds_egor.уровни_знаний t1
 	WHERE NOT EXISTS (
 	SELECT 1 FROM dm_egor.уровни_знаний t2 WHERE t1.id = t2.ID_уровня
-	);
+	)
+    AND t1.название != 'Использовал на проекте';
 END;
 $$;
 
@@ -70,7 +71,8 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION insert_4_col_dm_egor(tab_name text)
+-- заполняет таблицу навыки слоя dm_egor данными из указанной таблицы
+CREATE OR REPLACE FUNCTION _навыки_insert_dm_egor(tab_name text)
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
     EXECUTE format(
@@ -88,7 +90,8 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION create_insert_4_col_dm_egor()
+-- заполняет таблицу навыки слоя dm_egor
+CREATE OR REPLACE FUNCTION навыки_dm_egor()
 RETURNS void LANGUAGE plpgsql AS $$
 DECLARE
     tab_name text;
@@ -100,7 +103,7 @@ DECLARE
 BEGIN
     FOREACH tab_name IN ARRAY tab_names
     LOOP
-        PERFORM insert_4_col_dm_egor(tab_name);
+        PERFORM _навыки_dm_egor(tab_name);
     END LOOP;
 END;
 $$;
@@ -123,7 +126,11 @@ BEGIN
                 END AS Дата,
                 t1."User ID",
                 t1.%I AS "Навыки",
-                t1."Уровень знаний",
+                -- меняем id Использовал на проекте на id Novice
+                CASE
+                    WHEN t1."Уровень знаний" = 283045 THEN 115637
+                    ELSE t1."Уровень знаний"
+                END AS "Уровень знаний",
                 %L::INT AS Группа_навыков,
                 ROW_NUMBER() OVER (
                     PARTITION BY "User ID", t1.%I, t1.дата, t1."Дата изм."

@@ -20,30 +20,20 @@ BEGIN
             цфо
         FROM dds_egor.сотрудники_дар
         WHERE цфо = 'DAR'
-        AND активность = 'Да'
-    ),
-    classified_roles_clean AS (
-        SELECT
-            t1.id,
-            t1.фамилия,
-            t1.имя,
-            t1."должность"
-        FROM classified_roles t1
-        WHERE t1."должность" IS NOT NULL
-        AND t1.активность = 'Да'
-        AND NOT EXISTS (
-            SELECT 1 FROM dm_egor.сотрудники_дар t2 WHERE t1.id = t2.ID_сотрудника
-        )
+			AND активность = 'Да'
     )
-    INSERT INTO dm_egor.сотрудники_дар (ID_сотрудника, Фамилия, Имя, Роль, Общее_количество, Количество_по_должности)
+    INSERT INTO dm_egor.сотрудники_дар
     SELECT
-        crc.id,
-        crc.фамилия,
-        crc.имя,
-        crc."должность",
-        (SELECT count(*) FROM classified_roles_clean) AS total_number,
-        COUNT(*) OVER (PARTITION BY должность) AS number_by_position
-    FROM classified_roles_clean crc;
+        t1.id,
+        t1.фамилия,
+        t1.имя,
+        t1."должность"
+    FROM classified_roles t1
+    WHERE t1."должность" IS NOT NULL
+	AND t1.активность = 'Да'
+	AND NOT EXISTS (
+        SELECT 1 FROM dm_egor.сотрудники_дар t2 WHERE t1.id = t2.ID_сотрудника
+    );
 END;
 $$;
 

@@ -103,7 +103,7 @@ DECLARE
 BEGIN
     FOREACH tab_name IN ARRAY tab_names
     LOOP
-        PERFORM _навыки_dm_egor(tab_name);
+        PERFORM _навыки_insert_dm_egor(tab_name);
     END LOOP;
 END;
 $$;

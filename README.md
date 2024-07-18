@@ -17,10 +17,7 @@
 
 ### layers
 
-Каталог `layers` содержит файлы `transform_rules_manager.py` и `dag_manager.py`, а также каталог слоя `dm`.
-
-- **Модуль `layers/transform_rules_manager.py`**
-Содержит функции для выполнения ETL-процесса, а также передает DataFrame в функции трансформации, определенные в transform_rules.py
+Каталог `layers` содержит файл `dag_manager.py`, а также каталог слоя `dm`.
 
 - **Модуль `layers/dag_manager.py`**
 Содержит вспомогательные функции, используемые в DAG для выполнения различных операций, а также функцию etl_for_dm, которая выполняет ETL-процесс. Функция get_data_from_airflow_var извлекает данные из переменной Airflow для соединение с базой данных, sql_query_executer_by_path выполняет SQL-скрипт по указанному пути, load_data_to_target_table осуществляет загрузку трансформированных данные в целевую таблицу

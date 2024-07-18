@@ -42,25 +42,25 @@ create_functions_task = PostgresOperator(
 run_сотрудники_дар_task = PostgresOperator(
     task_id='run_function_сотрудники_дар',
     postgres_conn_id=target_conn_id,
-    sql='SELECT сотрудники_дар_dm_egor();',
+    sql='SELECT сотрудники_дар_dm();',
     dag=dag,
 )
 run_уровни_знаний_task = PostgresOperator(
     task_id='run_function_уровни_знаний',
     postgres_conn_id=target_conn_id,
-    sql='SELECT уровни_знаний_dm_egor();',
+    sql='SELECT уровни_знаний_dm();',
     dag=dag,
 )
 run_группы_навыков_task = PostgresOperator(
     task_id='run_function_группы_навыков',
     postgres_conn_id=target_conn_id,
-    sql='SELECT группы_навыков_dm_egor();',
+    sql='SELECT группы_навыков_dm();',
     dag=dag,
 )
 run_навыки_task = PostgresOperator(
     task_id='run_function_навыки',
     postgres_conn_id=target_conn_id,
-    sql='SELECT навыки_dm_egor();',
+    sql='SELECT навыки_dm();',
     dag=dag,
 )
 

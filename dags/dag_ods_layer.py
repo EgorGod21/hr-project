@@ -10,7 +10,7 @@ from scripts import db_utils_transfer
 source_conn_id = Variable.get('source_conn_id', 'source_postgres_stage')
 target_conn_id = Variable.get('target_conn_id', 'target_postgres_ods')
 schema_name = Variable.get('schema_name', 'source_data')
-new_schema_name = Variable.get('new_schema_name', 'ods_egor')
+new_schema_name = Variable.get('new_schema_name', 'ods')
 
 source_engine = db_utils_transfer.get_engine(source_conn_id)
 target_engine = db_utils_transfer.get_engine(target_conn_id)

@@ -41,8 +41,8 @@ create_functions_task = PostgresOperator(
 run_functions_non_par_task = PostgresOperator(
     task_id='run_functions_non_par',
     postgres_conn_id=target_conn_id,
-    sql='''SELECT сотрудники_дар_dds_egor();
-        SELECT insert_4_col_all_tables_dds_egor();''',
+    sql='''SELECT сотрудники_дар_dds();
+        SELECT insert_4_col_all_tables_dds();''',
     dag=dag,
 )
 

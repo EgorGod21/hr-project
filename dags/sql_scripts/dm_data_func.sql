@@ -28,8 +28,6 @@ BEGIN
         t1.фамилия,
         t1.имя,
         t1."должность"
-        CASE
-            WHEN t1.id IN (SELECT id FROM dm.сотрудники_дар)
     FROM classified_roles t1
     WHERE t1."должность" IS NOT NULL
 	AND t1.активность = 'Да'

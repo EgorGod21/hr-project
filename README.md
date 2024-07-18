@@ -13,7 +13,7 @@
 
 - **`dm_dag.py`**
 
-`dags.py` - DAG для Airflow, который осуществляет ETL-процесс слоя dm. `dags.py` использует функцию из dag_manager.py для получения данных из переменной Airflow, а также определяет две задачи с помощью PythonOperator: creating_tables_for_dm и etl_process_for_dm. Сначала выполняется задача creating_tables_for_dm, а затем etl_process_for_dm. 
+`dm_dag.py` - DAG для Airflow, который осуществляет ETL-процесс слоя dm. `dags.py` использует функцию из dag_manager.py для получения данных из переменной Airflow, а также определяет две задачи с помощью PythonOperator: creating_tables_for_dm и etl_process_for_dm. Сначала выполняется задача creating_tables_for_dm, а затем etl_process_for_dm. 
 
 ### layers
 

@@ -110,7 +110,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION группы_навыков_и_уровень_знаний_сотруд_dm(
     main_table text,
-	field_fk1 text,
+    field_fk1 text,
     table_fk1 text,
     p_group_number INT
 ) RETURNS void AS $$
@@ -121,19 +121,18 @@ BEGIN
                 t1.id,
                 t1."Дата изм.",
                 CASE
-                    WHEN t1.дата IS NULL THEN DATE(t1."Дата изм.")
-                    ELSE t1.дата
+                    WHEN t1."дата" IS NULL THEN DATE(t1."Дата изм.")
+                    ELSE t1."дата"
                 END AS Дата,
                 t1."User ID",
                 t1.%I AS "Навыки",
-                -- меняем id Использовал на проекте на id Novice
                 CASE
                     WHEN t1."Уровень знаний" = 283045 THEN 115637
                     ELSE t1."Уровень знаний"
                 END AS "Уровень знаний",
                 %L::INT AS Группа_навыков,
                 ROW_NUMBER() OVER (
-                    PARTITION BY "User ID", t1.%I, t1.дата, t1."Дата изм."
+                    PARTITION BY "User ID", t1.%I, t1."дата"
                     ORDER BY
                     CASE t2.Название
                         WHEN ''Novice'' THEN 1
@@ -141,7 +140,6 @@ BEGIN
                         WHEN ''Middle'' THEN 3
                         WHEN ''Senior'' THEN 4
                         WHEN ''Expert'' THEN 5
-                        WHEN ''Использовал на проекте'' THEN 6
                         ELSE 0
                     END DESC
                 ) AS rank
@@ -151,16 +149,16 @@ BEGIN
             WHERE t1.активность = ''Да'' AND t3.название != ''Другое''
         )
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
-		SELECT rs.id,
-               rs."Дата изм.",
+        SELECT DISTINCT ON (rs."User ID", rs.Группа_навыков, rs."Навыки", rs."Уровень знаний")
+               rs.id,
                rs.Дата,
                rs."User ID",
-			   rs.Группа_навыков,
+               rs.Группа_навыков,
                rs."Навыки",
                rs."Уровень знаний"
         FROM ranked_skills rs
         WHERE rs.rank = 1
-		AND EXISTS (
+        AND EXISTS (
             SELECT 1 FROM dm.сотрудники_дар sd WHERE sd.ID_сотрудника = rs."User ID"
         )
         AND NOT EXISTS (

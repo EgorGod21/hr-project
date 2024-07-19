@@ -149,7 +149,7 @@ BEGIN
             WHERE t1.активность = ''Да'' AND t3.название != ''Другое''
         )
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
-        SELECT DISTINCT ON (rs."User ID", rs.Группа_навыков, rs."Навыки", rs."Уровень знаний")
+        SELECT
                rs.id,
                rs.Дата,
                rs."User ID",

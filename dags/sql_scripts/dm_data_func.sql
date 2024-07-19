@@ -119,7 +119,6 @@ BEGIN
         'WITH ranked_skills AS (
             SELECT
                 t1.id,
-                t1."Дата изм.",
                 CASE
                     WHEN t1."дата" IS NULL THEN DATE(t1."Дата изм.")
                     ELSE t1."дата"
@@ -129,7 +128,7 @@ BEGIN
                 CASE
                     WHEN t1."Уровень знаний" = 283045 THEN 115637
                     ELSE t1."Уровень знаний"
-                END AS "Уровень знаний",
+                END AS "Уровень_знаний",
                 %L::INT AS Группа_навыков,
                 ROW_NUMBER() OVER (
                     PARTITION BY "User ID", t1.%I, t1."дата"
@@ -146,23 +145,48 @@ BEGIN
             FROM dds.%I t1
             INNER JOIN dm.уровни_знаний t2 ON t2.ID_уровня = t1."Уровень знаний"
             INNER JOIN dds.%I t3 ON t1.%I = t3.id
-            WHERE t1.активность = ''Да'' AND t3.название != ''Другое''
+            WHERE t1.активность = ''Да''
+              AND t3.название != ''Другое''
+        ),
+        filtered_data_rank AS (
+            SELECT
+                rs.id,
+                rs.Дата,
+                rs."User ID",
+                rs.Группа_навыков,
+                rs."Навыки",
+                rs."Уровень_знаний"
+            FROM ranked_skills rs
+            WHERE rs.rank = 1
+        ),
+        filtered_data AS (
+            SELECT *
+            FROM filtered_data_rank
+            WHERE id NOT IN (
+                -- оставляем последний по дате уровень_владения
+                SELECT mt1.id
+                FROM filtered_data_rank mt1
+                JOIN filtered_data_rank mt2
+                  ON mt1."User ID" = mt2."User ID"
+                 AND mt1.Группа_навыков = mt2.Группа_навыков
+                 AND mt1.Навыки = mt2.Навыки
+                 AND mt1."Дата" < mt2."Дата"
+                 AND mt1."Уровень_знаний" > mt2."Уровень_знаний"
+            )
         )
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
         SELECT
-               rs.id,
-               rs.Дата,
-               rs."User ID",
-               rs.Группа_навыков,
-               rs."Навыки",
-               rs."Уровень знаний"
-        FROM ranked_skills rs
-        WHERE rs.rank = 1
-        AND EXISTS (
-            SELECT 1 FROM dm.сотрудники_дар sd WHERE sd.ID_сотрудника = rs."User ID"
+            *,
+            ROW_NUMBER() OVER (
+                PARTITION BY "User ID", Группа_навыков, Навыки
+                ORDER BY "Дата" ASC
+            ) AS "Индикатор"
+        FROM filtered_data fd
+        WHERE EXISTS (
+            SELECT 1 FROM dm.сотрудники_дар sd WHERE sd.ID_сотрудника = fd."User ID"
         )
         AND NOT EXISTS (
-            SELECT 1 FROM dm.группы_навыков_и_уровень_знаний_сотруд t2 WHERE rs.id = t2.id
+            SELECT 1 FROM dm.группы_навыков_и_уровень_знаний_сотруд t2 WHERE fd.id = t2.id
         );',
         field_fk1, p_group_number, field_fk1, main_table, table_fk1, field_fk1
     );

@@ -30,14 +30,12 @@ CREATE TABLE IF NOT EXISTS dm.уровни_знаний (
 -- 5 группы_навыков_и_уровень_знаний_сотруд
 CREATE TABLE IF NOT EXISTS dm.группы_навыков_и_уровень_знаний_сотруд (
 	ID INT PRIMARY KEY,
-    "Дата_изм." TIMESTAMP,
     Дата DATE,
 	"User ID" INT,
 	"Группа_навыков" INT,
     "Навыки" INT,
 	"Уровень_знаний" INT,
-    Новый_навык BOOLEAN,
-    Rank_навыков INT,
+    Индикатор BIGINT,
     FOREIGN KEY ("Группа_навыков") REFERENCES dm.группы_навыков (ID_группы),
     FOREIGN KEY ("Уровень_знаний") REFERENCES dm.уровни_знаний (ID_уровня),
 	FOREIGN KEY ("Навыки") REFERENCES dm.навыки (ID_навыка),

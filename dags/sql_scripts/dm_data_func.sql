@@ -141,7 +141,11 @@ BEGIN
                         WHEN ''Expert'' THEN 5
                         ELSE 0
                     END DESC
-                ) AS rank
+                ) AS rank_1,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "User ID", t1.%I, t1."Уровень знаний"
+                    ORDER BY t1."дата"
+                ) AS rank_2
             FROM dds.%I t1
             INNER JOIN dm.уровни_знаний t2 ON t2.ID_уровня = t1."Уровень знаний"
             INNER JOIN dds.%I t3 ON t1.%I = t3.id
@@ -157,7 +161,7 @@ BEGIN
                 rs."Навыки",
                 rs."Уровень_знаний"
             FROM ranked_skills rs
-            WHERE rs.rank = 1
+            WHERE rs.rank_1 = 1 AND rs.rank_2 = 1
         ),
         filtered_data AS (
             SELECT *
@@ -177,10 +181,14 @@ BEGIN
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
         SELECT
             *,
-            ROW_NUMBER() OVER (
-                PARTITION BY "User ID", Группа_навыков, Навыки
-                ORDER BY "Дата" ASC
-            ) AS "Индикатор"
+            LAG(fd."Дата") OVER (
+                PARTITION BY fd."User ID" , fd.Группа_навыков, fd."Навыки"
+                ORDER BY fd."Дата"
+            ) AS "Дата_предыдущего_грейда",
+            LEAD(fd."Дата") OVER (
+                PARTITION BY fd."User ID", fd.Группа_навыков, fd."Навыки"
+                ORDER BY fd."Дата"
+            ) AS "Дата_следующего_грейда"
         FROM filtered_data fd
         WHERE EXISTS (
             SELECT 1 FROM dm.сотрудники_дар sd WHERE sd.ID_сотрудника = fd."User ID"
@@ -188,7 +196,7 @@ BEGIN
         AND NOT EXISTS (
             SELECT 1 FROM dm.группы_навыков_и_уровень_знаний_сотруд t2 WHERE fd.id = t2.id
         );',
-        field_fk1, p_group_number, field_fk1, main_table, table_fk1, field_fk1
+        field_fk1, p_group_number, field_fk1, field_fk1, main_table, table_fk1, field_fk1
     );
 END;
 $$ LANGUAGE plpgsql;

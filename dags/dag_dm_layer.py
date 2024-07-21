@@ -1,19 +1,24 @@
-import datetime
 import os
+from datetime import timedelta
 
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.operators.empty import EmptyOperator
 from airflow.models import Variable
+from airflow.utils.dates import days_ago
 
 target_conn_id = Variable.get('target_conn_id', 'target_postgres_ods')
 dag_folder = os.path.dirname(__file__)
 
 dag = DAG(
     'dag_dm_layer',
-    start_date=datetime.datetime(2024, 7, 5),
+    start_date=days_ago(1),
     description='Transfer data from dds layer to dm layer',
-    schedule_interval=None,
+    schedule_interval='0 21 * * *',
+    default_args={
+                    'retries': 5,
+                    'retry_delay': timedelta(minutes=5),
+                },
 )
 
 with open(os.path.join(dag_folder, "sql_scripts/create_dm_tables.sql"), 'r', encoding='utf-8') as f:

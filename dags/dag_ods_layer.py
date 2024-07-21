@@ -1,9 +1,10 @@
-import datetime
+from datetime import timedelta
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.generic_transfer import GenericTransfer
 from airflow.models import Variable
+from airflow.utils.dates import days_ago
 
 from scripts import db_utils_transfer
 
@@ -17,9 +18,13 @@ target_engine = db_utils_transfer.get_engine(target_conn_id)
 
 dag = DAG(
     'dag_ods_layer',
-    start_date=datetime.datetime(2024, 7, 5),
+    start_date=days_ago(1),
     description='Transfer data from stage layer to ods layer',
-    schedule_interval=None,
+    schedule_interval='0 20 * * *',
+    default_args={
+            'retries': 5,
+            'retry_delay': timedelta(minutes=5),
+        },
 )
 
 create_schema_task = PythonOperator(

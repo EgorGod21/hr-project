@@ -20,7 +20,7 @@ target_engine: Engine = airflow_var_data['target_engine']
 # Дефолтные значения ДАГа
 default_args = {
     'start_date': datetime(2024, 7, 17),
-    'schedule_interval': None,
+    'schedule_interval': '0 21 * * *',
 }
 
 # Инициализация ДАГа

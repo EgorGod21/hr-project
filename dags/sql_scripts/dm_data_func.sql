@@ -136,8 +136,9 @@ BEGIN
             SELECT
                 *,
                 ROW_NUMBER() OVER (
-                    PARTITION BY "User ID", rs.Навыки, rs."Уровень_знаний"
-                    ORDER BY rs."Дата"
+                    PARTITION BY "User ID", rs.Навыки, rs."Дата"
+                    ORDER BY
+                    rs."Уровень_знаний" DESC
                 ) AS rank_1
             FROM ranked_skills rs
         ),
@@ -145,9 +146,8 @@ BEGIN
             SELECT
                 *,
                 ROW_NUMBER() OVER (
-                    PARTITION BY "User ID", fdr.Навыки, fdr."Дата"
-                    ORDER BY
-                    fdr."Уровень_знаний" DESC
+                    PARTITION BY "User ID", fdr.Навыки, fdr."Уровень_знаний"
+                    ORDER BY fdr."Дата"
                 ) AS rank_2
             FROM filtered_data_rank fdr
             WHERE id NOT IN (

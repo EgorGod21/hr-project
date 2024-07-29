@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+import re
 
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -44,7 +45,7 @@ create_functions_task = PostgresOperator(
 )
 
 run_functions_non_par_task = PostgresOperator(
-    task_id='run_functions_non_par',
+    task_id='run_functions_сотрудники_дар',
     postgres_conn_id=target_conn_id,
     sql='''SELECT сотрудники_дар_dds();
         SELECT insert_4_col_all_tables_dds();''',
@@ -52,8 +53,10 @@ run_functions_non_par_task = PostgresOperator(
 )
 
 for idx, task in enumerate(run_dds_data_func):
+    task_match = re.search(r"'([^']*)'", task)
+    task_name = task_match.group(1) if task_match else task.split()[1].replace('();', '')
     run_functions_par_task = PostgresOperator(
-        task_id=f'run_functions_par_{idx + 1}',
+        task_id=f'run_functions_{task_name}',
         postgres_conn_id=target_conn_id,
         sql=task,
         dag=dag,

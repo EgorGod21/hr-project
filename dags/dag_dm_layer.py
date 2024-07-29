@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+import re
 
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -72,8 +73,10 @@ run_навыки_task = PostgresOperator(
 intermediate_task = EmptyOperator(task_id="intermediate_task", dag=dag)
 
 for idx, task in enumerate(run_dm_data_func):
+    task_match = re.search(r"'(\w+)'", task)
+    task_name = task_match.group(1) if task_match is not None else idx
     run_functions_par_task = PostgresOperator(
-        task_id=f'run_functions_par_{idx + 1}',
+        task_id=f'run_functions_{task_name}',
         postgres_conn_id=target_conn_id,
         sql=task,
         dag=dag,

@@ -55,8 +55,6 @@ $$;
 CREATE OR REPLACE FUNCTION группы_навыков_dm()
 RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
-	CREATE UNIQUE INDEX IF NOT EXISTS уникальный_группа_навыков
-	ON dm.группы_навыков ("Группа_навыков");
     INSERT INTO dm.группы_навыков ("Группа_навыков")
 	VALUES
 	('Инструменты'),
@@ -66,8 +64,7 @@ BEGIN
 	('Типы систем'),
 	('Фреймворки'),
 	('Языки программирования'),
-	('Технологии')
-    ON CONFLICT ("Группа_навыков") DO NOTHING;
+	('Технологии');
 END;
 $$;
 

@@ -133,39 +133,32 @@ BEGIN
                 ROW_NUMBER() OVER (
                     PARTITION BY "User ID", t1.%I, t1."дата"
                     ORDER BY
-                    CASE t2.Название
-                        WHEN ''Novice'' THEN 1
-                        WHEN ''Junior'' THEN 2
-                        WHEN ''Middle'' THEN 3
-                        WHEN ''Senior'' THEN 4
-                        WHEN ''Expert'' THEN 5
-                        ELSE 0
-                    END DESC
-                ) AS rank_1,
-                ROW_NUMBER() OVER (
-                    PARTITION BY "User ID", t1.%I, t1."Уровень знаний"
-                    ORDER BY t1."дата"
-                ) AS rank_2
+                    t1."Уровень знаний" DESC
+                ) AS rank_1
             FROM dds.%I t1
-            INNER JOIN dm.уровни_знаний t2 ON t2.ID_уровня = t1."Уровень знаний"
             INNER JOIN dds.%I t3 ON t1.%I = t3.id
             WHERE t1.активность = ''Да''
               AND t3.название != ''Другое''
         ),
         filtered_data_rank AS (
             SELECT
-                rs.id,
-                rs.Дата,
-                rs."User ID",
-                rs.Группа_навыков,
-                rs."Навыки",
-                rs."Уровень_знаний"
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "User ID", rs.Навыки, rs."Уровень_знаний"
+                    ORDER BY rs."Дата"
+                ) AS rank_2
             FROM ranked_skills rs
-            WHERE rs.rank_1 = 1 AND rs.rank_2 = 1
+            WHERE rs.rank_1 = 1
         ),
         filtered_data AS (
-            SELECT *
-            FROM filtered_data_rank
+            SELECT
+                fdr.id,
+                fdr.Дата,
+                fdr."User ID",
+                fdr.Группа_навыков,
+                fdr."Навыки",
+                fdr."Уровень_знаний"
+            FROM filtered_data_rank fdr
             WHERE id NOT IN (
                 -- оставляем последний по дате уровень_владения
                 SELECT mt1.id
@@ -176,7 +169,7 @@ BEGIN
                  AND mt1.Навыки = mt2.Навыки
                  AND mt1."Дата" < mt2."Дата"
                  AND mt1."Уровень_знаний" > mt2."Уровень_знаний"
-            )
+            ) AND fdr.rank_2 = 1
         )
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
         SELECT
@@ -196,7 +189,7 @@ BEGIN
         AND NOT EXISTS (
             SELECT 1 FROM dm.группы_навыков_и_уровень_знаний_сотруд t2 WHERE fd.id = t2.id
         );',
-        field_fk1, p_group_number, field_fk1, field_fk1, main_table, table_fk1, field_fk1
+        field_fk1, p_group_number, field_fk1, main_table, table_fk1, field_fk1
     );
 END;
 $$ LANGUAGE plpgsql;

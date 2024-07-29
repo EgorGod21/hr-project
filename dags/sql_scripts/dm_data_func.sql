@@ -126,12 +126,7 @@ BEGIN
                     WHEN t1."Уровень знаний" = 283045 THEN 115637
                     ELSE t1."Уровень знаний"
                 END AS "Уровень_знаний",
-                %L::INT AS Группа_навыков,
-                ROW_NUMBER() OVER (
-                    PARTITION BY "User ID", t1.%I, t1."дата"
-                    ORDER BY
-                    t1."Уровень знаний" DESC
-                ) AS rank_1
+                %L::INT AS Группа_навыков
             FROM dds.%I t1
             INNER JOIN dds.%I t3 ON t1.%I = t3.id
             WHERE t1.активность = ''Да''
@@ -143,18 +138,17 @@ BEGIN
                 ROW_NUMBER() OVER (
                     PARTITION BY "User ID", rs.Навыки, rs."Уровень_знаний"
                     ORDER BY rs."Дата"
-                ) AS rank_2
+                ) AS rank_1
             FROM ranked_skills rs
-            WHERE rs.rank_1 = 1
         ),
         filtered_data AS (
             SELECT
-                fdr.id,
-                fdr.Дата,
-                fdr."User ID",
-                fdr.Группа_навыков,
-                fdr."Навыки",
-                fdr."Уровень_знаний"
+                *,
+                ROW_NUMBER() OVER (
+                    PARTITION BY "User ID", fdr.Навыки, fdr."Дата"
+                    ORDER BY
+                    fdr."Уровень_знаний" DESC
+                ) AS rank_2
             FROM filtered_data_rank fdr
             WHERE id NOT IN (
                 -- оставляем последний по дате уровень_владения
@@ -166,11 +160,16 @@ BEGIN
                  AND mt1.Навыки = mt2.Навыки
                  AND mt1."Дата" < mt2."Дата"
                  AND mt1."Уровень_знаний" > mt2."Уровень_знаний"
-            ) AND fdr.rank_2 = 1
+            ) AND fdr.rank_1 = 1
         )
         INSERT INTO dm.группы_навыков_и_уровень_знаний_сотруд
         SELECT
-            *,
+            fd.id,
+            fd.Дата,
+            fd."User ID",
+            fd.Группа_навыков,
+            fd."Навыки",
+            fd."Уровень_знаний",
             LAG(fd."Дата") OVER (
                 PARTITION BY fd."User ID" , fd.Группа_навыков, fd."Навыки"
                 ORDER BY fd."Дата"
@@ -185,8 +184,8 @@ BEGIN
         )
         AND NOT EXISTS (
             SELECT 1 FROM dm.группы_навыков_и_уровень_знаний_сотруд t2 WHERE fd.id = t2.id
-        );',
-        field_fk1, p_group_number, field_fk1, main_table, table_fk1, field_fk1
+        ) AND fd.rank_2 = 1;',
+        field_fk1, p_group_number, main_table, table_fk1, field_fk1
     );
 END;
 $$ LANGUAGE plpgsql;

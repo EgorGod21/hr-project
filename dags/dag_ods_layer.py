@@ -20,7 +20,7 @@ dag = DAG(
     'dag_ods_layer',
     start_date=days_ago(1),
     description='Transfer data from stage layer to ods layer',
-    schedule_interval='0 20 * * *',
+    schedule_interval='0 21 * * *',
     default_args={
             'retries': 5,
             'retry_delay': timedelta(minutes=5),

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.sensors.external_task import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 from sqlalchemy.engine import Engine
 
@@ -49,4 +50,11 @@ with DAG(
         op_kwargs=airflow_var_data,
     )
 
-    create_layer_schema_and_tables >> etl_process
+    start_task_dds = ExternalTaskSensor(
+        task_id='start_task_dds',
+        external_dag_id='dag_dds_layer',
+        external_task_id='end_task_dds',
+        mode='poke'
+    )
+
+    start_task_dds >> create_layer_schema_and_tables >> etl_process

@@ -12,7 +12,7 @@
 
 ### [layers](https://github.com/EgorGod21/hr-project/tree/main/framework/layers)
 
-Каталог [`layers`](https://github.com/EgorGod21/hr-project/tree/main/framework/layers) содержит файлы [`layer_manager.py`](https://github.com/EgorGod21/hr-project/blob/main/framework/layers/layer_manager.py) и [`transform_rules_manager.py`](https://github.com/EgorGod21/hr-project/blob/main/framework/layers/transform_rules_manager.py), а также каталоги слоев `[ods](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/ods), [dds](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/dds) и [dm](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/dm)`.
+Каталог [`layers`](https://github.com/EgorGod21/hr-project/tree/main/framework/layers) содержит файлы [`layer_manager.py`](https://github.com/EgorGod21/hr-project/blob/main/framework/layers/layer_manager.py) и [`transform_rules_manager.py`](https://github.com/EgorGod21/hr-project/blob/main/framework/layers/transform_rules_manager.py), а также каталоги слоев [`ods`](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/ods), [`dds`](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/dds) и [`dm`](https://github.com/EgorGod21/hr-project/tree/main/framework/layers/dm).
 
 - **Модуль [`layer_manager.py`](https://github.com/EgorGod21/hr-project/blob/main/framework/layers/layer_manager.py)**
 

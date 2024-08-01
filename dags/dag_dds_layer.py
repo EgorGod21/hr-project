@@ -14,7 +14,7 @@ dag_folder = os.path.dirname(__file__)
 
 dag = DAG(
     'dag_dds_layer',
-    start_date=days_ago(1),
+    start_date=days_ago(0),
     description='Transfer data from ods layer to dds layer',
     schedule_interval='0 21 * * *',
     default_args={

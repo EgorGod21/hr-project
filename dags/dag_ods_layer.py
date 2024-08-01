@@ -18,7 +18,7 @@ target_engine = db_utils_transfer.get_engine(target_conn_id)
 
 dag = DAG(
     'dag_ods_layer',
-    start_date=days_ago(1),
+    start_date=days_ago(0),
     description='Transfer data from stage layer to ods layer',
     schedule_interval='0 21 * * *',
     default_args={

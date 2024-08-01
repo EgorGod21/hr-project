@@ -27,11 +27,11 @@ default_args = {
 
 # Инициализация ДАГа
 with DAG(
-    dag_id='dds_to_dm',
+    dag_id='dag_dm_layer',
     default_args=default_args,
     description='ETL process from DDS to DM',
     schedule_interval='0 21 * * *',
-    start_date=days_ago(1),
+    start_date=days_ago(0),
 ) as dag:
     # Инициализация задачи создания слоя и его таблиц
     create_layer_schema_and_tables = PythonOperator(
@@ -51,7 +51,7 @@ with DAG(
     )
 
     start_task_dds = ExternalTaskSensor(
-        task_id='start_task_dds',
+        task_id='start_task_dm',
         external_dag_id='dag_dds_layer',
         external_task_id='end_task_dds',
         mode='poke'
